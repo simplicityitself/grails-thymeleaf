@@ -37,3 +37,4 @@ Add the latest version of the plugin to the BuildConfig.groovy
 * Test/ add support for the render command.
 * Investigate taglibs and whether they could integrate.
 * Ensure performance is good enough.
+* Add scaffold view generation
