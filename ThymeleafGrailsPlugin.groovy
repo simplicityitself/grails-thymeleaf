@@ -1,5 +1,7 @@
+import org.springframework.beans.factory.config.BeanReferenceFactoryBean
 import org.thymeleaf.spring3.SpringTemplateEngine
 import org.thymeleaf.spring3.view.ThymeleafViewResolver
+import org.thymeleaf.templateresolver.FileTemplateResolver
 import org.thymeleaf.templateresolver.ServletContextTemplateResolver
 
 class ThymeleafGrailsPlugin {
@@ -7,7 +9,7 @@ class ThymeleafGrailsPlugin {
   def version = "0.1"
   def grailsVersion = "2 > *"
   def pluginExcludes = [
-          "grails-app/views/error.gsp"
+      "grails-app/views/error.gsp"
   ]
 
   def title = "Grails Thymeleaf Plugin" // Headline display name of the plugin
@@ -23,57 +25,40 @@ Integrate Thymeleaf as the View rendering technology
 
   def organization = [name: "Simplicity Itself", url: "http://www.simplicityitself.com/"]
 
-  def issueManagement = [ system: "Github", url: "http://www.github.com/simplicityitself/grails-thymeleaf/issues" ]
+  def issueManagement = [system: "Github", url: "http://www.github.com/simplicityitself/grails-thymeleaf/issues"]
 
-  def scm = [ url: "http://www.github.com/simplicityitself/grails-thymeleaf" ]
+  def scm = [url: "http://www.github.com/simplicityitself/grails-thymeleaf"]
 
-  def doWithWebDescriptor = { xml ->
-    // TODO Implement additions to web.xml (optional), this event occurs before
-  }
 
   def doWithSpring = {
-    // TODO Implement runtime spring config (optional)
 
-    templateResolver(ServletContextTemplateResolver) { bean ->
-      prefix = ''
-      suffix = ".html"
-      templateMode = "HTML5"
-      //TODO, verify what this should be
-      cacheable=false
+    if (application.warDeployed) {
+      thymeLeafTemplateResolver(ServletContextTemplateResolver) { bean ->
+        prefix = '/WEB-INF/grails-app/views'
+        suffix = ".html"
+        templateMode = "HTML5"
+        cacheable = true
+      }
+    } else {
+      thymeLeafTemplateResolver(FileTemplateResolver) { bean ->
+        prefix = 'grails-app/views'
+        suffix = ".html"
+        templateMode = "HTML5"
+        cacheable = false
+      }
     }
-    templateEngine(SpringTemplateEngine) {
-      templateResolver=ref("templateResolver")
+    thymeLeafTemplateEngine(SpringTemplateEngine) {
+      templateResolver = ref("thymeLeafTemplateResolver")
     }
     viewResolver(ThymeleafViewResolver) {
-      templateEngine=ref("templateEngine")
-      order=10
-      viewNames=["*"] as String[]
+      templateEngine = ref("thymeLeafTemplateEngine")
+      order = 10
+      viewNames = ["*"] as String[]
       //TODO, verify what this should be
-      cache=false
+      cache = false
     }
-
-  }
-
-  def doWithDynamicMethods = { ctx ->
-    // TODO Implement registering dynamic methods to classes (optional)
-  }
-
-  def doWithApplicationContext = { ctx ->
-    // TODO Implement post initialization spring config (optional)
-  }
-
-  def onChange = { event ->
-    // TODO Implement code that is executed when any artefact that this plugin is
-    // watching is modified and reloaded. The event contains: event.source,
-    // event.application, event.manager, event.ctx, and event.plugin.
-  }
-
-  def onConfigChange = { event ->
-    // TODO Implement code that is executed when the project configuration changes.
-    // The event is the same as for 'onChange'.
-  }
-
-  def onShutdown = { event ->
-    // TODO Implement code that is executed when the application shuts down (optional)
+    //This overrides the view resolver used to resolve bound URL views.
+    //Effectively disables both GSP and JSP :-)
+    springConfig.addAlias 'jspViewResolver', 'viewResolver'
   }
 }
