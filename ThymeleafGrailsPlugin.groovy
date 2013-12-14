@@ -1,4 +1,3 @@
-import org.springframework.beans.factory.config.BeanReferenceFactoryBean
 import org.thymeleaf.spring3.SpringTemplateEngine
 import org.thymeleaf.spring3.view.ThymeleafViewResolver
 import org.thymeleaf.templateresolver.FileTemplateResolver
